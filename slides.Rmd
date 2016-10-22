@@ -25,7 +25,7 @@ library(readr)
 <div class="columns-2">
   <img src="figure/heike.jpg" width="200">
   <img src="figure/dicook.png" width="175">
-  <img src="http://stat.iastate.edu/files/styles/people_thumb/public/people/profilepictures/SamanthaTynerMTII.jpg" width="170">
+  <img src="figure/sam.jpg" width="170">
 
 <br>
 Heike Hofmann<br>
@@ -102,11 +102,11 @@ tables <- tidyr::html_table(doc)
 
 ## RCP national polls
 
-```{r}
+```{r cache=FALSE}
 url <- "http://www.realclearpolitics.com/epolls/2016/president/us/general_election_trump_vs_clinton-5491.html"
-doc <- xml2::read_html(url)
-tables <- rvest::html_table(doc)
-tables %>% purrr::map(.f = dim)
+doc <- xml2::read_html(url) 
+tables <- rvest::html_table(doc) 
+tables %>% purrr::map(.f = dim) 
 ```
 
 ## Raw data {.smaller}
@@ -116,7 +116,7 @@ raw <- tables[[4]]
 tail(raw)
 ```
 
-First impressions: 224 polls dating back to May ... but that's May 2015!
+First impressions: `r nrow(raw)` polls dating back to May ... but that's May 2015!
 
 ## Data Cleaning Checklist
 
@@ -152,7 +152,7 @@ glimpse(polls)
 
 ```{r}
 library(lubridate)
-polls <- raw[1:118, ] %>% 
+polls <- raw[1:119, ] %>% 
   separate(Date, into = c("Start_Date", "End_Date"), sep = " - ") %>%
   mutate(
     Start_Date = ymd(paste("2016", Start_Date, sep = "/")),
@@ -282,6 +282,15 @@ polls %>%
 - Make a plan for processing the data
 - Start working on this process for one of the data sets
 - Assess the possibility of automating the process (i.e. write function, use repeatedly)
+
+## Alternate Exercise
+
+- Do you have an idea on how to fix the Poll names?
+
+```{r}
+levels(polls$Poll)
+```
+
 
 # genderize
 
