@@ -6,8 +6,8 @@ output:
     widescreen: true
     css: styles.css
     logo: figure/wsds.png
-    fig_width: 7
-    fig_height: 6
+    fig_width: 5
+    fig_height: 5
     fig_caption: true
 ---
 
@@ -208,7 +208,7 @@ polls %>%
 
 - combine all pollsters with fewer than five polls into `Other`
 
-```{r}
+```{r fig.height =4}
 levels(polls$Poll)[1:15] <- "Other"
 
 polls %>% 
@@ -240,8 +240,72 @@ polls %>%
   xlab("Date")
 ```
 
+## Code for Visualization {.smaller}
+
+```
+library(ggplot2)
+brewer_cols <- RColorBrewer::brewer.pal(9, "Paired") # only palette with nine values without grey
+
+polls %>% 
+  ggplot(aes(x = End_Date, y = Clinton - Trump)) +
+    annotate("text", x = ymd("2016/07/1"), y = 10, label = "Clinton", 
+             size = 30, colour = "grey90", hjust=0) +
+    annotate("text", x = ymd("2016/07/1"), y = -10, label = "Trump", 
+             size = 30, colour = "grey90", hjust=0) +
+    geom_hline(yintercept = 0, colour = "grey80") + 
+    geom_smooth(se = FALSE, colour = "grey50") +
+    geom_point(aes(colour = Poll), size = 2.5) +
+    geom_segment(aes(colour = Poll, yend = Clinton - Trump, xend = Start_Date)) +
+    theme_bw() + 
+    theme(legend.position = "bottom") + 
+    scale_colour_manual("Pollster", values = c("grey70", brewer_cols), 
+                        guide = guide_legend(nrow = 3)) +
+  ylim(c(-15, 15)) +
+  ylab("Percentage Point Difference") +
+  xlab("Date")
+```
+## Visualization Recap
+
+- there is huge variability in polls and between pollsters
+- house bias of some pollsters is enormous (cf. LA Times versus NBC News)
+
+
 # Your Turn
 
 ## Exercise
 
-- Pick one of the (swing) states RealClearPolitics 
+- RealClearPolitics shows all state-level poll results from last week at [http://www.realclearpolitics.com/epolls/latest_polls/state/](http://www.realclearpolitics.com/epolls/latest_polls/state/)
+- Read the data from the website
+- Identify the data format
+- Make a plan for processing the data
+- Start working on this process for one of the data sets
+- Assess the possibility of automating the process (i.e. write function, use repeatedly)
+
+# genderize
+
+## Genderize
+
+<img src="figure/genderize.png" alt="genderize.io" style="width:704px;height:439px;">
+
+## `genderizeR` package {.smaller}
+
+Kamil Wais (2016). genderizeR: Gender Prediction Based on First Names. R
+  package version 2.0.0. https://CRAN.R-project.org/package=genderizeR
+  
+```{r}
+library(genderizeR)
+
+givenNames <- findGivenNames(c("heike", "di", "sam", "samantha"))
+```
+
+## `genderizeR` results
+
+```{r}
+givenNames
+```
+
+- results from findGivenNames build database to be used in `genderize` function 
+- genderize.io API restricts to at most free 1000 checks a day
+- `findGivenNames` allows for country specification 
+
+# R package authors
