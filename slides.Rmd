@@ -12,7 +12,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, cache = FALSE)
 library(dplyr)
 library(readr)
 ```
@@ -293,7 +293,7 @@ polls %>%
 Kamil Wais (2016). genderizeR: Gender Prediction Based on First Names. R
   package version 2.0.0. https://CRAN.R-project.org/package=genderizeR
   
-```{r}
+```{r results='hide'}
 library(genderizeR)
 
 givenNames <- findGivenNames(c("heike", "di", "sam", "samantha", "jiayang", "bin", "german", "christian"))
@@ -304,6 +304,8 @@ givenNames <- findGivenNames(c("heike", "di", "sam", "samantha", "jiayang", "bin
 ```{r}
 givenNames
 ```
+
+##
 
 - results from findGivenNames build database to be used in `genderize` function 
 - genderize.io API restricts to at most free 1000 checks a day
@@ -431,7 +433,9 @@ ggplot(maintainer_year_clean, aes(x=year, fill=gender)) +
                     na.value="white")
 ```
 
-## Your turn
+# Your Turn
+
+## Exercise 
 
 - Extract the author first names from the R package details
 - Match the names to gender
