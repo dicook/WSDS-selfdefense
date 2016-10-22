@@ -64,10 +64,11 @@ All Resources are available from GitHub at [https://github.com/dicook/WSDS-selfd
 
 - Download the repo (zip or download to desktop)
 
-- Double-click the R project WSDS-selfdefense.Rproj
+- Double-click the R project `WSDS-selfdefense.Rproj`
 
-- slides.Rmd contains this set of slides (and the code)
+- `slides.Rmd` contains this set of slides (and the code)
 
+- Do you have the newest version of R? some packages we use need `R 3.3.1` 
 
 # Scraping the web
 
