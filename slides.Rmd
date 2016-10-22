@@ -141,7 +141,7 @@ separate <- function (data, col, into, sep = "[^[:alnum:]]+", remove = TRUE,
 ```{r}
 library(tidyr)
 polls <- raw %>% separate(Date, into = c("Start_Date", "End_Date"), sep = " - ")
-head(polls)
+glimpse(polls)
 ```
 
 ## Data Cleaning (2) {.smaller}
@@ -298,9 +298,6 @@ library(genderizeR)
 
 givenNames <- findGivenNames(c("heike", "di", "sam", "samantha", "jiayang", "bin", "german", "christian"))
 ```
-
-## `genderizeR` results
-
 ```{r}
 givenNames
 ```
@@ -309,7 +306,7 @@ givenNames
 
 - results from findGivenNames build database to be used in `genderize` function 
 - genderize.io API restricts to at most free 1000 checks a day
-- `findGivenNames` allows for country specification (XXX I don't think that this is true)
+- genderize.io  allows for country specification, but `findGivenNames` doesn't support that yet
 
 # R package authors
 
@@ -341,11 +338,12 @@ clean_up <- function(x){
 ```{r echo=FALSE}
 library(stringr)
 library(Hmisc)
-db_df <- data.frame(db)
-maintainer_year_unclean <- data.frame(name = unname(db_df$Maintainer),
-        year = as.integer(substr(unname(db_df$Published), 1, 4)),
-        author = unname(db_df$Author),
-        title = db_df$Title)
+maintainer_year_unclean <- data.frame(db) %>% transmute(
+    name = Maintainer,
+    year = as.integer(substr(Published, 1, 4)),
+    author = Author,
+    title = Title
+  )
 
 clean_up <- function(x){
   # get rid of punctuation
@@ -358,18 +356,20 @@ clean_up <- function(x){
   x4 <- tolower(x3)
   return(x4)
 }
-maintainer_year_clean <- maintainer_year_unclean
-maintainer_year_clean$firstname <- clean_up(maintainer_year_clean$name)
+maintainer_year_clean <- maintainer_year_unclean %>% mutate(
+  firstname = clean_up(name)
+)
 ```
 
 ##
 
 ```{r eval=FALSE}
-db_df <- data.frame(db)
-maintainer_year_unclean <- data.frame(name = unname(db_df$Maintainer),
-        year = as.integer(substr(unname(db_df$Published), 1, 4)),
-        author = unname(db_df$Author),
-        title = db_df$Title)
+maintainer_year_unclean <- data.frame(db) %>% transmute(
+    name = Maintainer,
+    year = as.integer(substr(Published, 1, 4)),
+    author = Author,
+    title = Title
+  )
 maintainer_year_clean <- maintainer_year_unclean
 maintainer_year_clean$firstname <- clean_up(maintainer_year_clean$name)
 ```
