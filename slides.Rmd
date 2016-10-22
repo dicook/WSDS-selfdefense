@@ -14,6 +14,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 library(dplyr)
+library(readr)
 ```
 
 # Empowering Women with Self-defense Skills using R
@@ -22,9 +23,9 @@ library(dplyr)
 ## The Instructors {.smaller}
 
 <div class="columns-2">
-  ![](figure/heike.jpg)
-  ![](figure/dicook.png)
-  ![](http://stat.iastate.edu/files/styles/people_thumb/public/people/profilepictures/SamanthaTynerMTII.jpg)
+  <img src="figure/heike.jpg" width="200">
+  <img src="figure/dicook.png" width="175">
+  <img src="http://stat.iastate.edu/files/styles/people_thumb/public/people/profilepictures/SamanthaTynerMTII.jpg" width="170">
 
 <br>
 Heike Hofmann<br>
@@ -283,9 +284,9 @@ polls %>%
 
 # genderize
 
-## Genderize
+## 
 
-<img src="figure/genderize.png" alt="genderize.io" style="width:704px;height:439px;">
+<img src="figure/genderize.png" alt="genderize.io" style="width:800px;vertical-align:top;float:right;">
 
 ## `genderizeR` package {.smaller}
 
@@ -295,7 +296,7 @@ Kamil Wais (2016). genderizeR: Gender Prediction Based on First Names. R
 ```{r}
 library(genderizeR)
 
-givenNames <- findGivenNames(c("heike", "di", "sam", "samantha"))
+givenNames <- findGivenNames(c("heike", "di", "sam", "samantha", "jiayang", "bin", "german", "christian"))
 ```
 
 ## `genderizeR` results
@@ -306,6 +307,136 @@ givenNames
 
 - results from findGivenNames build database to be used in `genderize` function 
 - genderize.io API restricts to at most free 1000 checks a day
-- `findGivenNames` allows for country specification 
+- `findGivenNames` allows for country specification (XXX I don't think that this is true)
 
 # R package authors
+
+## Collect the list from RStudio's CRAN mirror
+
+- Download package details from [http://cran.rstudio.com//web/packages/packages.rds](http://cran.rstudio.com//web/packages/packages.rds)
+
+```{r}
+db <- readRDS("data/packages.rds")
+glimpse(db)
+```
+
+## Clean up
+
+```{r eval=FALSE}
+clean_up <- function(x){
+  # get rid of punctuation
+  x1 <- gsub("[[:punct:]]", " ", x)
+  # remove leading space before first name
+  x2 <- str_trim(x1 , side="left")
+  # get first name only
+  x3 <- unlist(lapply(x2, first.word))
+  # gender function only takes lower case
+  x4 <- tolower(x3)
+  return(x4)
+}
+```
+
+```{r echo=FALSE}
+library(stringr)
+library(Hmisc)
+db_df <- data.frame(db)
+maintainer_year_unclean <- data.frame(name = unname(db_df$Maintainer),
+        year = as.integer(substr(unname(db_df$Published), 1, 4)),
+        author = unname(db_df$Author),
+        title = db_df$Title)
+
+clean_up <- function(x){
+  # get rid of punctuation
+  x1 <- gsub("[[:punct:]]", " ", x)
+  # remove leading space before first name
+  x2 <- str_trim(x1 , side="left")
+  # get first name only
+  x3 <- unlist(lapply(x2, first.word))
+  # gender function only takes lower case
+  x4 <- tolower(x3)
+  return(x4)
+}
+maintainer_year_clean <- maintainer_year_unclean
+maintainer_year_clean$firstname <- clean_up(maintainer_year_clean$name)
+```
+
+##
+
+```{r eval=FALSE}
+db_df <- data.frame(db)
+maintainer_year_unclean <- data.frame(name = unname(db_df$Maintainer),
+        year = as.integer(substr(unname(db_df$Published), 1, 4)),
+        author = unname(db_df$Author),
+        title = db_df$Title)
+maintainer_year_clean <- maintainer_year_unclean
+maintainer_year_clean$firstname <- clean_up(maintainer_year_clean$name)
+```
+
+```{r}
+glimpse(maintainer_year_clean)
+```
+
+## Manually edited name list
+
+- First names of maintainers of R packages, genderized in March 2016
+- Manually edited to give some guesses for non-European names
+
+```{r}
+genderized_names <- read_csv("data/all_names_manual.csv")
+maintainer_year_clean <- left_join(maintainer_year_clean,
+                                   genderized_names, by="firstname")
+glimpse(maintainer_year_clean)
+```
+
+## Create summaries
+
+```{r}
+maintainer_year_clean %>% group_by(gender) %>% tally()
+```
+
+## Plot counts
+
+```{r fig.width=5, fig.height=4, fig.align='center'}
+ggplot(maintainer_year_clean, aes(x=gender, fill=gender)) +
+  geom_bar() +
+  scale_fill_manual("", values=c("female"="#fc8d59", "male"="#2166ac"),
+                    na.value="white")
+```
+
+## By year
+
+```{r fig.width=9, fig.height=4, fig.align='center'}
+ggplot(maintainer_year_clean, aes(x=gender, fill=gender)) +
+  geom_bar() +
+  scale_fill_manual("", values=c("female"="#fc8d59", "male"="#2166ac"),
+                    na.value="white") +
+  facet_wrap(~year)
+```
+
+## 
+
+```{r fig.width=9, fig.height=4, fig.align='center'}
+ggplot(maintainer_year_clean, aes(x=year, fill=gender)) +
+  geom_bar() +
+  scale_fill_manual("", values=c("female"="#fc8d59", "male"="#2166ac"),
+                    na.value="white")
+```
+
+## Focus on proportions
+
+```{r fig.width=9, fig.height=4, fig.align='center'}
+ggplot(maintainer_year_clean, aes(x=year, fill=gender)) +
+  geom_bar(position = "fill") +
+  scale_fill_manual("", values=c("female"="#fc8d59", "male"="#2166ac"),
+                    na.value="white")
+```
+
+## Your turn
+
+- Extract the author first names from the R package details
+- Match the names to gender
+- Make some summaries of the gender statistics
+
+## That's all
+
+Happy hacking!!
